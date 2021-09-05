@@ -14,7 +14,7 @@ class EmoteDatabase():
             self.conn.close()
         self.conn = psycopg2.connect(self.db_url)
 
-    def find_by_name(self, name):
+    def find_by_name(self, name, mode='startswith', fetch_all=False):
         '''
         Find an emote in the database by name
 
@@ -24,11 +24,10 @@ class EmoteDatabase():
         Returns:
             The emote if found, None otherwise
         '''
-        SQL = "SELECT * FROM Emotes WHERE name=%s"
-        data = (name, )
+        SQL = f"SELECT * FROM Emotes WHERE name ILIKE '{'%' if mode == 'contains' else ''}{name}{'%' if mode != 'exact' else ''}'"
         cur = self.conn.cursor()
-        cur.execute(SQL, data)
-        result = cur.fetchone()
+        cur.execute(SQL)
+        result = cur.fetchall() if fetch_all else cur.fetchone() 
         cur.close()
         return result
 
@@ -55,9 +54,20 @@ class EmoteDatabase():
         cur = self.conn.cursor()
         cur.execute(SQL, data)
         self.conn.commit()
-        cur.execute("SELECT id FROM Emotes WHERE name=%s", (emote_name, ))
+        cur.execute('SELECT id FROM Emotes WHERE name ILIKE %s', (emote_name, ))
         return cur.fetchone() != None
 
+    
+    def exec(self, query):
+        cur = self.conn.cursor()
+        try:
+            a = cur.execute(query)
+        except:
+            return False
+        finally:
+            cur.close()
+            self.conn.commit()
+            return a
 
     
 def get_server_emotes(server : discord.Guild):
@@ -75,34 +85,18 @@ def get_server_emotes(server : discord.Guild):
         emotes.append(emoji)
     return emotes
 
-def emote_to_dict(emote : discord.Emoji):
-    '''
-    Convert a discord.Emoji to a dict with the following keys:
-        name -- The name of the emoji
-        id -- The id of the emoji
-        animated -- True if the emoji is animated
-        url -- The asset url of the emoji
-    
-    Arguments:
-        emote -- The emoji to convert, a discord.Emoji object
-    
-    Returns:
-        A dict containing the above information
-    '''
-    info = dict()
-    info['name'] = str(emote.name)
-    info['url'] = str(emote.url)
-    return info
-
 def emote_request(message):
     '''
     Returns the emote name if a message is an emote request, None otherwise
     '''
     msg = message.content
-    if msg.startswith(':') and msg.endswith(':') and msg.find(' ') == -1:
-        return msg[1:-1]
-    else:
-        return None
+    print(msg)
+    if msg.startswith(':') and msg.find(' ') == -1:
+        if msg.endswith(':'):
+            return msg[1:-1]
+        else:
+            return msg[1:]
+    return None
 
 
 import re
