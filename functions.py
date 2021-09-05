@@ -7,7 +7,7 @@ def show_images(query, emote_db):
     """
     Show image in a new window
     """
-    result = emote_db.find_by_name(query, mode='contains', fetch_all=True)
+    result = emote_db.find_emote_by_name(query, mode='contains', fetch_all=True)
     fig = plt.figure(figsize=(5., 5.))
     grid = ImageGrid(fig, 111,  # similar to subplot(111)
                     nrows_ncols=(5, 5), 
