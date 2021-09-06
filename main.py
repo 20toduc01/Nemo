@@ -67,9 +67,8 @@ async def on_message(message : discord.Message):
             if not found:
                 # If not in the database
                 if emote_db.find_emote_by_name(e_name[i]) is None:
-                    if emote_db.add_emote(e_name[i], f'https://cdn.discordapp.com/emojis/{e_id[i]}.png') is not None:
+                    if emote_db.add_emote(e_name[i], f'https://cdn.discordapp.com/emojis/{e_id[i]}.png'):
                         await message.channel.send(f'Added {e_name[i]} to database')
-                        active_emotes.append(e_name[i])
         # Normalize relevance score
         relevance_score = relevance_score / (np.sum(relevance_score) + 1e-9)
 
@@ -95,16 +94,13 @@ async def on_message(message : discord.Message):
 
     if request:
         # If request is actually not valid
-        print(request.lower(), active_emotes_name)
         for active_emote in active_emotes_name:
             if request.lower() in active_emote:
                 return
-        print(request)
         # Find the emote in the database
         query = emote_db.find_emote_by_name(request)
         # If the emote is found in the database
         if query:
-            print('gg2')
             if message.guild.emoji_limit - len(active_emotes) <= 1:
                 # Remove the least relevant emote from the active emote list
                 min_index = np.argmin(relevance_score)
