@@ -7,6 +7,12 @@ class EmoteDatabase():
         self.conn = psycopg2.connect(self.db_url)
 
 
+    def get_conn(self):
+        return self.conn
+
+    def get_cursor(self):
+        return self.conn.cursor()
+
     def find_emote_by_name(self, name, mode='startswith', fetch_all=False):
         '''
         Find an emote in the database by name
@@ -125,7 +131,7 @@ def emote_request(message):
     '''
     msg = message.content
     print(msg)
-    if msg.startswith(':') and msg.find(' ') == -1:
+    if msg.startswith(':') and msg.find(' ') == -1 and not msg.endswith('>'):
         if msg.endswith(':'):
             return msg[1:-1]
         else:
