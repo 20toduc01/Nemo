@@ -143,7 +143,7 @@ async def on_message(message : discord.Message):
                         least_used = count
                         least_used_emote = name
                 active_map.pop(least_used_emote)
-                await message.channel.send(f'Deleting the least used emote that is {least_used_emote}')
+                # await message.channel.send(f'Deleting the least used emote that is {least_used_emote}')
                 for emote in message.guild.emojis:
                     if emote.name.lower() == least_used_emote:
                         await emote.delete()
@@ -157,7 +157,8 @@ async def on_message(message : discord.Message):
                 await message.delete()
         # If the emote is not found in the database
         else:
-            await message.channel.send('Not in the database. Use addemote command.')
+            pass
+            # await message.channel.send('Not in the database. Use addemote command.')
 
         
 client.run(TOKEN)
