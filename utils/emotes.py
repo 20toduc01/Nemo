@@ -60,7 +60,7 @@ class EmoteDatabase():
             True if the emote was added, False otherwise
         '''
         # If an emote with the same name already exists, don't add it
-        if self.find_emote_by_name(emote_name) is not None:
+        if self.find_emote_by_name(emote_name, mode='exact') is not None:
             return False
         
         # Proceed

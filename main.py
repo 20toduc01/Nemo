@@ -72,6 +72,15 @@ async def on_message(message : discord.Message):
         result = emote_db.add_emote(message.content.split()[1], str(message.attachments[0].url))
         await message.channel.send('Successful' if result else 'Some error ocurred')
 
+    if message.content.lower().startswith('addanimated'):
+        emotename = message.content.split()[1]
+        if len(message.content.split()) > 2:
+            emoteurl = message.content.split()[2]
+        else:
+            emoteurl = str(message.attachments[0].url)
+        print(emotename, emoteurl)
+        emote_db.exec(f"""INSERT INTO AnimatedEmotes(name, url) VALUES ('{emotename}', '{emoteurl}')""")
+
     '''Find animated emotes'''
     if message.content.lower().startswith('findanimated'):
         query = message.content.split()[1]
