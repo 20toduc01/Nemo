@@ -55,6 +55,8 @@ async def on_message(message : discord.Message):
         emote_db.exec(f'UPDATE Emotes SET name=\'{message.content.split()[2]}\' WHERE name ILIKE \'{message.content.split()[1]}\'')
         await message.channel.send('Done (maybe)')
 
+    #test
+
     '''Boost use count of an emote'''
     if message.content.lower().startswith('boostemote'):
         ename = message.content.split()[1]
