@@ -1,11 +1,12 @@
 import os
-from re import search
-from utils.general import *
-from utils.emotes import *
 import numpy as np
 import discord
-from discord.ext import tasks
+
 from dotenv import load_dotenv
+
+from functions import show_images
+from utils.general import *
+from utils.emotes import *
 
 load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')
@@ -29,7 +30,8 @@ async def on_ready():
     for emote in main_guild.emojis:
         data = emote_db.find_emote_by_name(emote.name.lower(), mode='exact')
         if data is None:
-            emote_db.add_emote(emote.name, f'https://cdn.discordapp.com/emojis/{emote.id}.png')
+            emote_db.add_emote(
+                emote.name, f'https://cdn.discordapp.com/emojis/{emote.id}.png')
             active_map[emote.name.lower()] = 0
         else:
             active_map[emote.name.lower()] = data[3]
@@ -37,9 +39,8 @@ async def on_ready():
     # 816221905387782155 jm 281418237156261889 matngu
 
 
-from functions import *
 @client.event
-async def on_message(message : discord.Message):
+async def on_message(message: discord.Message):
     global main_guild
 
     if message.content.lower().startswith('emoterank'):
@@ -47,20 +48,22 @@ async def on_message(message : discord.Message):
 
     '''Delete an emote function'''
     if message.content.lower().startswith('delemote'):
-        result = emote_db.exec(f'DELETE FROM Emotes WHERE name ILIKE \'{message.content.split()[1]}\'')
+        result = emote_db.exec(
+            f'DELETE FROM Emotes WHERE name ILIKE \'{message.content.split()[1]}\'')
         await message.channel.send('Done (maybe)')
 
     '''Change alias of an emote'''
     if message.content.lower().startswith('changealias'):
-        emote_db.exec(f'UPDATE Emotes SET name=\'{message.content.split()[2]}\' WHERE name ILIKE \'{message.content.split()[1]}\'')
+        emote_db.exec(
+            f'UPDATE Emotes SET name=\'{message.content.split()[2]}\' WHERE name ILIKE \'{message.content.split()[1]}\'')
         await message.channel.send('Done (maybe)')
 
-    #test
+    # test
 
     '''Boost use count of an emote'''
     if message.content.lower().startswith('boostemote'):
         ename = message.content.split()[1]
-        
+
         emote_db.exec(f"""UPDATE emotes SET use_count = 50 + (
                             SELECT use_count FROM emotes WHERE name ILIKE '{ename}'
                           )
@@ -71,7 +74,8 @@ async def on_message(message : discord.Message):
 
     '''Check if user wants to explicitly add an emote to database'''
     if message.content.lower().startswith('addemote'):
-        result = emote_db.add_emote(message.content.split()[1], str(message.attachments[0].url))
+        result = emote_db.add_emote(message.content.split()[
+                                    1], str(message.attachments[0].url))
         await message.channel.send('Successful' if result else 'Some error ocurred')
 
     if message.content.lower().startswith('addanimated'):
@@ -81,24 +85,24 @@ async def on_message(message : discord.Message):
         else:
             emoteurl = str(message.attachments[0].url)
         print(emotename, emoteurl)
-        emote_db.exec(f"""INSERT INTO AnimatedEmotes(name, url) VALUES ('{emotename}', '{emoteurl}')""")
+        emote_db.exec(
+            f"""INSERT INTO AnimatedEmotes(name, url) VALUES ('{emotename}', '{emoteurl}')""")
 
     '''Find animated emotes'''
     if message.content.lower().startswith('findanimated'):
         query = message.content.split()[1]
         cur = emote_db.get_cursor()
-        cur.execute(f'SELECT * FROM AnimatedEmotes WHERE name ILIKE \'%{query}%\'')
+        cur.execute(
+            f'SELECT * FROM AnimatedEmotes WHERE name ILIKE \'%{query}%\'')
         a = cur.fetchall()
         cur.close()
         await message.channel.send([x[1] for x in a])
-
 
     '''Show all emotes by name'''
     if message.content.lower().startswith('findemote'):
         query = message.content.split()[-1]
         show_images(query, emote_db)
         await message.channel.send(file=discord.File('./output/temp_grid.png'))
-
 
     '''Update relevance score of emotes function and copy new emotes'''
     # Extract emotes names from message
@@ -108,10 +112,11 @@ async def on_message(message : discord.Message):
         if emote_db.find_emote_by_name(e_name[i]) is None:
             if emote_db.add_emote(e_name[i], f'https://cdn.discordapp.com/emojis/{e_id[i]}.png'):
                 await message.channel.send(f'Added {e_name[i]} to database')
-        emote_db.exec(f'UPDATE Emotes SET use_count = use_count + 1 WHERE name ILIKE \'{e_name[i]}\'')
+        emote_db.exec(
+            f'UPDATE Emotes SET use_count = use_count + 1 WHERE name ILIKE \'{e_name[i]}\'')
         if e_name[i].lower() in active_map.keys():
             active_map[e_name[i].lower()] += 1
-    
+
     '''Copy animated emotes'''
     e_name, e_id = animated_emotes_from_message(message)
     # Update relevance score of emotes
@@ -119,7 +124,6 @@ async def on_message(message : discord.Message):
         if emote_db.find_animated_emote_by_name(e_name[i]) is None:
             if emote_db.add_animated_emote(e_name[i], f'https://cdn.discordapp.com/emojis/{e_id[i]}.gif') is True:
                 await message.channel.send(f'Added {e_name[i]} to database')
-
 
     '''Process emote request'''
     request = emote_request(message)
@@ -131,10 +135,11 @@ async def on_message(message : discord.Message):
 
     if request:
         # If request is actually not valid
-        
+
         # Find the emote in the database
         if message.content.endswith(':'):
-            if request.lower() in active_map.keys(): return
+            if request.lower() in active_map.keys():
+                return
             query = emote_db.find_emote_by_name(request, mode='exact')
         else:
             for active_emote in active_map.keys():
@@ -146,7 +151,7 @@ async def on_message(message : discord.Message):
         # If the emote is found in the database
         if query:
             if message.guild.emoji_limit - len(active_map.keys()) <= 1:
-                
+
                 least_used = 1e9
                 least_used_emote = None
                 for name, count in active_map.items():
@@ -171,5 +176,5 @@ async def on_message(message : discord.Message):
             pass
             # await message.channel.send('Not in the database. Use addemote command.')
 
-        
+
 client.run(TOKEN)

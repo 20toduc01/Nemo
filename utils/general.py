@@ -1,4 +1,10 @@
-import os, discord, pickle
+import os
+import discord
+import numpy as np
+
+from io import BytesIO
+from PIL import Image
+
 
 def mkdirs(dir):
     try:
@@ -7,7 +13,7 @@ def mkdirs(dir):
         pass
 
 
-async def impersonate_message(target_message : discord.Message, message_content):
+async def impersonate_message(target_message: discord.Message, message_content):
     '''
     Send a new message with message_content to the same channel
     as target_message, using nickname and avatar of sender.
@@ -31,9 +37,6 @@ async def impersonate_message(target_message : discord.Message, message_content)
     await webhook.send(content=message_content, username=display_name, avatar_url=avatar_url, wait=True)
 
 
-from PIL import Image
-from io import BytesIO
-
 def bytes_to_image(bytes):
     '''
     Convert bytes to image
@@ -44,11 +47,10 @@ def bytes_to_image(bytes):
     Returns:
         PIL Image object
     '''
-    
     img = Image.open(BytesIO(bytes))
     return img
 
-import numpy as np
+
 def stable_softmax(x):
     z = x - np.max(x, axis=-1, keepdims=True)
     numerator = np.exp(z)
