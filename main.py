@@ -3,6 +3,7 @@ import numpy as np
 import discord
 
 from dotenv import load_dotenv
+from pprint import pformat
 
 from functions import show_images
 from utils.general import *
@@ -44,7 +45,7 @@ async def on_message(message: discord.Message):
     global main_guild
 
     if message.content.lower().startswith('emoterank'):
-        await message.channel.send(active_map)
+        await message.channel.send(pformat(active_map))
 
     '''Delete an emote function'''
     if message.content.lower().startswith('delemote'):
@@ -57,8 +58,6 @@ async def on_message(message: discord.Message):
         emote_db.exec(
             f'UPDATE Emotes SET name=\'{message.content.split()[2]}\' WHERE name ILIKE \'{message.content.split()[1]}\'')
         await message.channel.send('Done (maybe)')
-
-    # test
 
     '''Boost use count of an emote'''
     if message.content.lower().startswith('boostemote'):
@@ -134,8 +133,6 @@ async def on_message(message: discord.Message):
         return
 
     if request:
-        # If request is actually not valid
-
         # Find the emote in the database
         if message.content.endswith(':'):
             if request.lower() in active_map.keys():
