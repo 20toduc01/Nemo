@@ -4,12 +4,14 @@ import discord
 from dotenv import load_dotenv
 
 from bot.emotes.emote_cmd import EmoteCommands
+from bot.general.general_cmd import GeneralCommands
 
 
 load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')
 
 client = discord.Client()
+command_groups = []
 
 
 @client.event
@@ -22,14 +24,18 @@ async def on_ready():
     
     main_guild = client.get_guild(281418237156261889)
     
-    global emote_commands
+    global command_groups
     emote_commands = EmoteCommands(os.getenv('DATABASE_URL'), main_guild)
+    general_commands = GeneralCommands()
+    command_groups = [emote_commands, general_commands]
+
     # 816221905387782155 jm 281418237156261889 matngu
 
 
 @client.event
 async def on_message(message: discord.Message):
-    await emote_commands.process(message)
+    for command_group in command_groups:
+        await command_group.process(message)
 
 
 client.run(TOKEN)

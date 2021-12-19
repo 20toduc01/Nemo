@@ -3,20 +3,10 @@ from typing import Callable, Sequence
 import discord
 from pprint import pformat
 
-from ..general import bytes_to_image, collate, impersonate_message, commands
+from ..base import CommandsGroup, commands
+from ..utils import bytes_to_image, collate, impersonate_message
 from .emote_db import EmoteDatabase
 from .utils import emote_request, emotes_from_message, animated_emotes_from_message
-
-class CommandsGroup():
-    def __init__(self) -> None:
-        pass
-
-    def export(self) -> Sequence[Callable]:
-        raise NotImplementedError
-
-    async def process(self, message) -> None:
-        for command in self.export():
-            await command(message)
 
 
 class EmoteCommands(CommandsGroup):
@@ -133,8 +123,8 @@ class EmoteCommands(CommandsGroup):
         request = emote_request(message)
         animated = self.emote_db.find_animated_emote_by_name(request)
         if animated is not None:
-            await impersonate_message(message, animated[2] + '?size=64')
-            await message.delete()
+            await impersonate_message(message, animated[2] + '?size=64', 
+                                      delete_original=True)
             return
 
         if request:

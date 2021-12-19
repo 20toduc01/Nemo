@@ -1,12 +1,4 @@
 import re
-import matplotlib.pyplot as plt
-import io
-
-from PIL import Image
-from mpl_toolkits.axes_grid1 import ImageGrid
-
-from ..general import mkdirs
-
 
 def emote_request(message):
     '''

@@ -2,24 +2,14 @@ import os
 import discord
 from matplotlib import pyplot as plt
 
-from typing import Callable
 from io import BytesIO
 from PIL import Image
-
 from mpl_toolkits.axes_grid1 import ImageGrid
 
 
-def commands(trigger: str = None):
-    def decorator(function: Callable):
-        async def wrapper(instance, message: discord.Message):
-            if (trigger is None 
-                    or message.content.lower().startswith(trigger)): 
-                await function(instance, message)
-        return wrapper
-    return decorator
-
-
-async def impersonate_message(target_message: discord.Message, message_content):
+async def impersonate_message(target_message: discord.Message, 
+                              message_content: str,
+                              delete_original=True):
     '''
     Send a new message with message_content to the same channel
     as target_message, using nickname and avatar of sender.
@@ -42,6 +32,8 @@ async def impersonate_message(target_message: discord.Message, message_content):
 
     await webhook.send(content=message_content, username=display_name, 
                        avatar_url=avatar_url, wait=True)
+    if delete_original:
+        await target_message.delete()
 
 
 def mkdirs(dir):
