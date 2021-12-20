@@ -1,6 +1,5 @@
-import io
-from typing import Callable, Sequence
 import discord
+
 from pprint import pformat
 
 from ..base import CommandsGroup, commands
@@ -34,15 +33,15 @@ class EmoteCommands(CommandsGroup):
 
     @commands('delemote')
     async def delemote(self, message: discord.Message):
-        result = self.emote_db.exec(
+        success = self.emote_db.exec(
             f'DELETE FROM Emotes WHERE name ILIKE \'{message.content.split()[1]}\'')
-        await message.channel.send('Done (maybe)')
+        await message.channel.send('Done' if success else 'Failed')
     
     @commands('changealias')
     async def changealias(self, message: discord.Message):
-        self.emote_db.exec(
+        success = self.emote_db.exec(
             f'UPDATE Emotes SET name=\'{message.content.split()[2]}\' WHERE name ILIKE \'{message.content.split()[1]}\'')
-        await message.channel.send('Done (maybe)')
+        await message.channel.send('Done' if success else 'Failed')
         
     @commands('boostemote')
     async def boostemote(self, message: discord.Message):

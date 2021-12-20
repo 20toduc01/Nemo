@@ -30,7 +30,7 @@ class GeneralCommands(CommandsGroup):
         alias = message.content.split()[0][1:]
         url = self.pairs.get(alias, None)
         if url:
-            await impersonate_message(message, url)
+            await impersonate_message(message, url, delete_original=True)
 
     @commands('emergency')
     async def emergency(self, message: discord.Message):

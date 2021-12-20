@@ -1,16 +1,35 @@
 import psycopg2
 import requests
 
-class EmoteDatabase():
+from bot.base import PostgresDatabase
+
+
+class EmoteDatabase(PostgresDatabase):
     def __init__(self, DATABASE_URL):
-        self.db_url = DATABASE_URL
-        self.conn = psycopg2.connect(self.db_url)
+        super().__init__(DATABASE_URL)
 
-    def get_conn(self):
-        return self.conn
+    def create_emote_table(self):
+        '''
+        Create the table for emotes
 
-    def get_cursor(self):
-        return self.conn.cursor()
+        Returns:
+            True if the database was created, False otherwise
+        '''
+        SQL = ("CREATE TABLE IF NOT EXISTS Emotes(",
+               "id SERIAL PRIMARY KEY, name TEXT, ",
+               "image BYTEA, use_count INTEGER DEFAULT 0)")
+        return self.exec(SQL)
+
+    def create_animated_emote_table(self):
+        '''
+        Create the table for animated emotes
+
+        Returns:
+            True if the table was created, False otherwise
+        '''
+        SQL = ("CREATE TABLE IF NOT EXISTS AnimatedEmotes(",
+               "id SERIAL PRIMARY KEY, name TEXT, url TEXT)")
+        return self.exec(SQL)
 
     def find_emote_by_name(self, name, mode='startswith', fetch_all=False):
         '''
@@ -22,11 +41,9 @@ class EmoteDatabase():
         Returns:
             The emote if found, None otherwise
         '''
-        SQL = f"SELECT * FROM Emotes WHERE name ILIKE '{'%' if mode == 'contains' else ''}{name}{'%' if mode != 'exact' else ''}'"
-        cur = self.conn.cursor()
-        cur.execute(SQL)
-        result = cur.fetchall() if fetch_all else cur.fetchone()
-        cur.close()
+        SQL = ("SELECT * FROM Emotes WHERE name ILIKE ",
+              f"'{'%' if mode == 'contains' else ''}{name}{'%' if mode != 'exact' else ''}'")
+        result = self.fetch(SQL, mode='all' if fetch_all else 'one')
         return result
 
     def find_animated_emote_by_name(self, name, mode='startswith', fetch_all=False):
@@ -40,10 +57,7 @@ class EmoteDatabase():
             The emote if found, None otherwise
         '''
         SQL = f"SELECT * FROM AnimatedEmotes WHERE name ILIKE '{'%' if mode == 'contains' else ''}{name}{'%' if mode != 'exact' else ''}'"
-        cur = self.conn.cursor()
-        cur.execute(SQL)
-        result = cur.fetchall() if fetch_all else cur.fetchone()
-        cur.close()
+        result = self.fetch(SQL, mode='all' if fetch_all else 'one')
         return result
 
     def add_emote(self, emote_name, emote_url):
@@ -67,7 +81,6 @@ class EmoteDatabase():
         data = (emote_name, psycopg2.Binary(image_bytes))
         cur = self.conn.cursor()
         cur.execute(SQL, data)
-        self.conn.commit()
         cur.execute('SELECT id FROM Emotes WHERE name ILIKE %s',
                     (emote_name, ))
         return cur.fetchone() != None
@@ -92,16 +105,4 @@ class EmoteDatabase():
         data = (emote_name, emote_url)
         cur = self.conn.cursor()
         cur.execute(SQL, data)
-        self.conn.commit()
         return True
-
-    def exec(self, query):
-        cur = self.conn.cursor()
-        try:
-            a = cur.execute(query)
-        except:
-            return False
-        finally:
-            cur.close()
-            self.conn.commit()
-            return a
