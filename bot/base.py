@@ -30,7 +30,8 @@ class PostgresDatabase():
         cur = self.conn.cursor()
         try:
             cur.execute(query)
-        except Exception:
+        except Exception as e:
+            print(e)
             success = False
         cur.close()
         self.conn.commit()
@@ -49,7 +50,6 @@ class PostgresDatabase():
                 result = cur.fetchall()
             else:
                 result = cur.fetchone()
-                print(result)
         else:
             result = None
         cur.close()

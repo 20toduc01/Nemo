@@ -68,7 +68,6 @@ class EmoteCommands(CommandsGroup):
             emoteurl = message.content.split()[2]
         else:
             emoteurl = str(message.attachments[0].url)
-        print(emotename, emoteurl)
         self.emote_db.exec(
             f"""INSERT INTO AnimatedEmotes(name, url) VALUES ('{emotename}', '{emoteurl}')""")
     

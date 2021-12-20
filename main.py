@@ -24,9 +24,10 @@ async def on_ready():
     
     main_guild = client.get_guild(281418237156261889)
     
-    global command_groups
     emote_commands = EmoteCommands(os.getenv('DATABASE_URL'), main_guild)
-    general_commands = GeneralCommands()
+    general_commands = GeneralCommands(os.getenv('DATABASE_URL'))
+
+    global command_groups
     command_groups = [emote_commands, general_commands]
 
     # 816221905387782155 jm 281418237156261889 matngu

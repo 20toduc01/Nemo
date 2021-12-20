@@ -15,8 +15,8 @@ class EmoteDatabase(PostgresDatabase):
         Returns:
             True if the database was created, False otherwise
         '''
-        SQL = ("CREATE TABLE IF NOT EXISTS Emotes(",
-               "id SERIAL PRIMARY KEY, name TEXT, ",
+        SQL = ("CREATE TABLE IF NOT EXISTS Emotes("
+               "id SERIAL PRIMARY KEY, name TEXT, "
                "image BYTEA, use_count INTEGER DEFAULT 0)")
         return self.exec(SQL)
 
@@ -41,7 +41,7 @@ class EmoteDatabase(PostgresDatabase):
         Returns:
             The emote if found, None otherwise
         '''
-        SQL = ("SELECT * FROM Emotes WHERE name ILIKE ",
+        SQL = ("SELECT * FROM Emotes WHERE name ILIKE "
               f"'{'%' if mode == 'contains' else ''}{name}{'%' if mode != 'exact' else ''}'")
         result = self.fetch(SQL, mode='all' if fetch_all else 'one')
         return result
