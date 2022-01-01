@@ -13,7 +13,7 @@ class GeneralCommands(CommandsGroup):
         super().__init__()
 
     def export(self):
-        return [self.savethis, self.process_request]
+        return [self.savethis, self.process_request, self.savedstuff]
 
     @commands('savethis')
     async def savethis(self, message: discord.Message):
@@ -34,3 +34,10 @@ class GeneralCommands(CommandsGroup):
         query = self.pairs_db.find_link_by_name(alias, mode='exact')
         if query:
             await impersonate_message(message, query[2], delete_original=True)
+
+    @commands('savedstuff')
+    async def savedstuff(self, message: discord.Message):
+        query = self.pairs_db.fetch('SELECT name FROM Links', mode='all')
+        if query:
+            await impersonate_message(message, query, delete_original=True)
+        
