@@ -1,7 +1,6 @@
 discord
-psycopg2
+psycopg2-binary
 pillow
-numpy
 requests
 python-dotenv
 matplotlib
