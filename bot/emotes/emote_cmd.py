@@ -13,14 +13,20 @@ class EmoteCommands(CommandsGroup):
         super().__init__()
         self.emote_db = EmoteDatabase(database_connection_str)
         self.active_map = dict()
-        for emote in guild.emojis:
-            data = self.emote_db.find_emote_by_name(emote.name.lower(), mode='exact')
-            if data is None:
+        mapping = []
+        emotes = guild.emojis
+
+        for emote in emotes:
+            mapping.append(self.emote_db.get_emote_count(emote.name.lower()))
+
+        for emote, use_count in zip(emotes, mapping):
+            if use_count is None:
                 self.emote_db.add_emote(
-                    emote.name, f'https://cdn.discordapp.com/emojis/{emote.id}.png')
+                    emote.name, f'https://cdn.discordapp.com/emojis/{emote.id}.png'
+                )
                 self.active_map[emote.name.lower()] = 0
             else:
-                self.active_map[emote.name.lower()] = data[3]
+                self.active_map[emote.name.lower()] = use_count
 
     def export(self):
         return [self.emoterank, self.delemote, self.changealias, 
@@ -89,7 +95,7 @@ class EmoteCommands(CommandsGroup):
             images = [bytes_to_image(x[2]) for x in result]
             names = [x[1] for x in result]
             fig = collate(images, cols=5, rows=5, titles=names)
-            fig.savefig('./output/temp_grid.png')
+            fig.savefig('./temp_grid.png')
             await message.channel.send(file=discord.File('./output/temp_grid.png'))
         else:
             await message.channel.send('No results')
@@ -159,8 +165,7 @@ class EmoteCommands(CommandsGroup):
                 # If it's successful
                 if new_emote:
                     self.active_map[query[1].lower()] = query[3]
-                    await impersonate_message(message, str(new_emote))
-                    await message.delete()
+                    await impersonate_message(message, str(new_emote), delete_original=True)
             # If the emote is not found in the database
             else:
                 pass

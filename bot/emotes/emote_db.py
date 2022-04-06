@@ -31,6 +31,12 @@ class EmoteDatabase(PostgresDatabase):
                "id SERIAL PRIMARY KEY, name TEXT, url TEXT)")
         return self.exec(SQL)
 
+    def get_emote_count(self, name):
+        SQL = f"SELECT use_count FROM Emotes WHERE name ILIKE '{name}'"
+        result = self.fetch(SQL, mode='one')
+        if result is not None: result = result[0]
+        return result
+
     def find_emote_by_name(self, name, mode='startswith', fetch_all=False):
         '''
         Find an emote in the database by name

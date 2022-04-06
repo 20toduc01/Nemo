@@ -132,3 +132,5 @@ dmypy.json
 test.ipynb
 
 output/*
+
+*.png
